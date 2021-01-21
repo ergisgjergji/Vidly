@@ -1,0 +1,49 @@
+﻿@model Vidly.ViewModels.CustomerFormVm
+@{
+    ViewBag.Title = "New";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<h2 class="text-center">New Customer</h2>
+<hr/>
+
+<div class="col-sm-12 col-md-10 col-lg-7 mx-auto">
+    @using (Html.BeginForm("New", "Customers", FormMethod.Post))
+    {
+        @Html.AntiForgeryToken()
+
+        <div class="form-group">
+            @Html.LabelFor(m => m.Customer.Name)
+            @Html.TextBoxFor(m => m.Customer.Name, new { @class = "form-control" })
+            @Html.ValidationMessageFor(m => m.Customer.Name)
+        </div>
+        <div class="form-group">
+            @Html.LabelFor(m => m.Customer.Birthdate)
+            @Html.TextBoxFor(m => m.Customer.Birthdate, "{0:yyyy-MM-dd}", new { type = "date", max = @DateTime.Now.ToString("yyyy-MM-dd"), @class = "form-control " })
+            @Html.ValidationMessageFor(m => m.Customer.Birthdate)
+        </div>
+        <div class="form-group">
+            @Html.LabelFor(m => m.Customer.MembershipTypeId)
+            @Html.DropDownListFor(m =>
+                m.Customer.MembershipTypeId,
+                new SelectList(Model.MembershipTypes, "Id", "Name"),
+                "- Select Membership Type -",
+                new { @class = "form-control" }
+            )
+            @Html.ValidationMessageFor(m => m.Customer.MembershipTypeId)
+        </div>
+        <div class="form-group form-check">
+            @Html.CheckBoxFor(m => m.Customer.IsSubscribedToNewsletter, new { @class = "form-check-input" })
+            @Html.LabelFor(m => m.Customer.IsSubscribedToNewsletter)
+        </div>
+        <div class="text-right mt-4">
+            @Html.ActionLink("Back to list", "Index", "Customers", new { }, new { @class = "btn btn-md btn-secondary" })
+            <input type="submit" class="btn btn-md btn-primary ml-2" value="Submit"/>
+        </div>
+    }
+</div>
+
+@section scripts 
+{
+    @Scripts.Render("~/bundles/jqueryval")
+}

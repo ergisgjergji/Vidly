@@ -1,0 +1,20 @@
+﻿@model Vidly.Models.Movie
+
+@{
+    ViewBag.Title = "Details";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<div>
+    <h3>@Model.Name</h3>
+    <hr />
+    <ul>
+        <li> Genre: @Model.Genre.Name </li>
+        <li> Release Date: @Model.ReleaseDate </li>
+        <li> Date Added: @Model.AddedDate </li>
+        <li> Stock: @Model.NumberInStock </li>
+    </ul>
+</div>
+<p>
+    @Html.ActionLink("Back to List", "Index", new { }, new { @class = "btn btn-sm btn-secondary" })
+</p>

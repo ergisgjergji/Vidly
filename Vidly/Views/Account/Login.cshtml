@@ -1,0 +1,70 @@
+﻿@using Vidly.ViewModels
+@model LoginViewModel
+
+@{
+    ViewBag.Title = "Login";
+}
+
+<div class="row">
+
+    <div class="col-12 offset-md-1">
+        <h2>Login.</h2>
+    </div>
+
+    <div class="offset-md-1 col-md-6 mb-4">
+        <section id="loginForm">
+            @using (Html.BeginForm("Login", "Account", new { ReturnUrl = ViewBag.ReturnUrl }, FormMethod.Post, new { role = "form" }))
+            {
+                @Html.AntiForgeryToken()
+                <h4>Use a local account to log in.</h4>
+                <hr />
+
+                <div class="form-group">
+                    @Html.LabelFor(m => m.Email)
+                    @Html.TextBoxFor(m => m.Email, new { @class = "form-control" })
+                    @Html.ValidationMessageFor(m => m.Email)
+                </div>
+                <div class="form-group">
+                    @Html.LabelFor(m => m.Password)
+                    @Html.PasswordFor(m => m.Password, new { @class = "form-control" })
+                    @Html.ValidationMessageFor(m => m.Password)
+                </div>
+                <div class="form-group">
+                    <div class="col-md-10">
+                        <div class="checkbox">
+                            @Html.CheckBoxFor(m => m.RememberMe)
+                            @Html.LabelFor(m => m.RememberMe)
+                        </div>
+                    </div>
+                </div>
+                <div class="form-group text-center">
+                    <div class="d-block">
+                        <input type="submit" value="Log in" class="btn btn-primary text-center" />
+                    </div>
+                    <div class="d-block">
+                        <span> or </span>
+                    </div>
+                    <div class="d-block">
+                        @Html.ActionLink("Register", "Register", new { }, new { @class = "btn btn-success" })
+                    </div>
+                </div>
+                @* Enable this once you have account confirmation enabled for password reset functionality
+            <p>
+                @Html.ActionLink("Forgot your password?", "ForgotPassword")
+            </p>*@
+            }
+        </section>
+    </div>
+
+    <div class="offset-md-1 col-md-4 mb-4">
+        <section id="socialLoginForm">
+            @Html.Partial("_ExternalLoginsListPartial", new ExternalLoginListViewModel { ReturnUrl = ViewBag.ReturnUrl })
+        </section>
+    </div>
+
+</div>
+
+@section Scripts
+{
+    @Scripts.Render("~/bundles/jqueryval")
+}

@@ -1,0 +1,66 @@
+﻿@{
+    ViewBag.Title = "Movies";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+@*
+    This is a comment
+    in multiple lines
+*@
+
+<h2 class="mb-3 text-center">Movies</h2>
+<hr/>
+
+<table class="table table-bordered text-center w-100" id="movie-table">
+   <thead>
+       <tr class="table-dark">
+           <th> Name </th>
+           <th> Genre </th>
+           <th> Release Date </th>
+           <th> Available Copies </th>
+           <th> Actions </th>
+       </tr>
+    </thead>
+    <tbody></tbody>
+</table>
+
+@section scripts
+{
+    <script>
+        $(document).ready(function () {
+
+            // DataTable
+            var table = $('#movie-table').DataTable({
+                ajax: {
+                    url: '/api/movies',
+                    dataSrc: ''
+                },
+                columns: [
+                    { data: 'name' },
+                    { data: 'genre.name' },
+                    {
+                        data: 'releaseDate',
+                        render: function (data, type, object) {
+
+                            var date = new Date(data);
+                            var dateTimeFormat = new Intl.DateTimeFormat('en', { year: 'numeric', month: 'short', day: '2-digit' });
+                            var [{ value: month },, { value: day },, { value: year }] = dateTimeFormat.formatToParts(date);
+
+                            return `${day}-${month}-${year }`;
+                        }
+                    },
+                    { data: 'numberAvailable' },
+                    {
+                        data: 'id',
+                        orderable: false,
+                        searchable: false,
+                        render: function (data, type, object) {
+                            return '<a href="/Movies/Details/' + data + '" class="btn btn-sm btn-primary mr-1 mb-1"> Details </a>';
+                        }
+                    }
+                ]
+            });
+
+        });
+    </script>
+}

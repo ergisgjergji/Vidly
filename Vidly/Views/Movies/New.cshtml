@@ -1,0 +1,60 @@
+﻿@model Vidly.ViewModels.MovieFormVm
+@{
+    ViewBag.Title = "New";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<h2 class="text-center">New Movie</h2>
+<hr/>
+
+<div class="col-sm-12 col-md-10 col-lg-8 mx-auto">
+    @using (Html.BeginForm("New", "Movies", method: FormMethod.Post))
+    {
+        @Html.AntiForgeryToken()
+
+        <div class="form-group">
+            @Html.LabelFor(m => m.Movie.Name)
+            @Html.TextBoxFor(m => m.Movie.Name, new { @class = "form-control" })
+            @Html.ValidationMessageFor(m => m.Movie.Name)
+        </div>
+
+        <div class="form-group">
+            @Html.LabelFor(m => m.Movie.ReleaseDate)
+            @Html.TextBoxFor(m => m.Movie.ReleaseDate, "{0:yyyy-MM-dd}", new { type = "date", max = @DateTime.Now.ToString("yyyy-MM-dd"), @class = "form-control " })
+            @Html.ValidationMessageFor(m => m.Movie.ReleaseDate)
+        </div>
+
+        <div class="form-group">
+            @Html.LabelFor(m => m.Movie.AddedDate)
+            @Html.TextBoxFor(m => m.Movie.AddedDate, "{0:yyyy-MM-dd}", new { type = "date", max = @DateTime.Now.ToString("yyyy-MM-dd"), @class = "form-control " })
+            @Html.ValidationMessageFor(m => m.Movie.AddedDate)
+        </div>
+
+        <div class="form-group">
+            @Html.LabelFor(m => m.Movie.GenreId)
+            @Html.DropDownListFor(m =>
+                m.Movie.GenreId,
+                new SelectList(Model.Genres, "Id", "Name"),
+                "- Select Genre -",
+                new { @class = "form-control" }
+            )
+            @Html.ValidationMessageFor(m => m.Movie.GenreId)
+        </div>
+
+        <div class="form-group">
+            @Html.LabelFor(m => m.Movie.NumberInStock)
+            @Html.TextBoxFor(m => m.Movie.NumberInStock, new { type = "number", min = "0", @class = "form-control " })
+            @Html.ValidationMessageFor(m => m.Movie.NumberInStock)
+        </div>
+
+        <div class="text-right mt-4">
+            @Html.ActionLink("Back to list", "Index", "Movies", new { }, new { @class = "btn btn-md btn-secondary" })
+            <button type="submit" class="btn btn-md btn-primary ml-2"> Save </button>
+        </div>
+    }
+</div>
+
+@section scripts
+{
+    @Scripts.Render("~/bundles/jqueryval")
+}

@@ -1,0 +1,194 @@
+﻿@model dynamic
+
+@{
+    ViewBag.Title = "New";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<h2 class="text-center">New Rental</h2>
+<hr/>
+
+<div class="row">
+    <div class="col-11 col-md-6 mb-4 mx-auto">
+
+        <form id="rental-form">
+            <div class="form-row">
+
+                <div class="form-group col-sm-12 col-md-12 col-lg-6">
+                    <label> Customer </label>
+                    <div class="tt-container">
+                        <input id="customer" type="text" value="" class="form-control" data-rule-valid-customer="true" />
+                    </div>
+                </div>
+
+                <div class="form-group col-sm-12 col-md-12 col-lg-6">
+                    <label> Movie </label>
+                    <div class="tt-container">
+                        <input id="movie" type="text" value="" class="form-control" />
+                    </div>
+                </div>
+
+                <div class="form-group col-12 mb-0 text-right">
+                    <button id="rental-form-submit-btn" class="btn btn-block btn-primary"> Submit </button>
+                </div>
+
+            </div>      
+        </form>
+
+    </div>
+
+    <div class="col-11 col-md-4 mb-4 mx-auto">
+
+        <h5 class="text-center mb-2">Selected Movies</h5>
+
+        <div class="col-12 mx-auto">
+            <ul id="movies" class="list-group">
+                <li id="empty-list" class="list-group-item text-center text-secondary font-italic px-3 py-2">Cart is currently empty</li>
+            </ul>
+        </div>
+
+    </div>
+
+</div>
+
+
+@section scripts
+{
+    @Scripts.Render("~/bundles/jqueryval")
+
+    <script>
+        $(document).ready(function () {
+
+            // Data to be submitted (viewModel)
+            var vm = {
+                movieIds: []
+            };
+
+            // Prevent form submit
+            $('#rental-form').on('submit', function (e) {
+                e.preventDefault();
+            });
+
+            $('#rental-form-submit-btn').on('click', function () {
+
+                // First, we clear the previous errors
+                clearErrors();
+
+                if (isFormValid(vm)) {
+                    $.ajax({
+                        url: '/api/rentals',
+                        method: 'POST',
+                        data: vm
+                    }).done(function () {
+                        toastr.success('Rentals were added successfully.');
+                        clearData();
+                    }).fail(function () {
+                        toastr.error('An error occurred.');
+                    });
+                }
+            });
+
+            $.getJSON( "/api/customers", function( customers ) {
+                customer_typeahead(customers, vm)
+            });
+
+            $.getJSON( "/api/movies/available", function( movies ) {
+                movie_typeahead(movies, vm)
+            });
+
+            function customer_typeahead(customerList, viewModel) {
+
+                var customer = new Bloodhound({
+                    datumTokenizer: Bloodhound.tokenizers.obj.whitespace('name'),
+                    queryTokenizer: Bloodhound.tokenizers.whitespace,
+                    local: customerList
+                });
+
+                $('#customer').typeahead({ minLength: 1, highlight: true, hint: true }, {
+                    name: 'customer',
+                    display: 'name',
+                    source: customer
+                }).on("typeahead:select", function (e, selectedCustomer) {
+                    clearCustomerErrors();
+                    viewModel.customerId = selectedCustomer.id;
+                });
+            }
+            function movie_typeahead(movieList, viewModel) {
+
+                var movie = new Bloodhound({
+                    datumTokenizer: Bloodhound.tokenizers.obj.whitespace('name'),
+                    queryTokenizer: Bloodhound.tokenizers.whitespace,
+                    local: movieList
+                });
+
+                $('#movie').typeahead({ minLength: 1, highlight: true, hint: true }, {
+                    name: 'movie',
+                    display: 'name',
+                    source: movie
+                }).on("typeahead:select", function (e, selectedMovie) {
+
+                    clearMovieErrors();
+                    $('#empty-list').remove();
+
+                    // Check if current movie has already been added (if yes, don't add again)
+                    if (!viewModel.movieIds.includes(selectedMovie.id)) {
+
+                        viewModel.movieIds.push(selectedMovie.id);
+                        $('#movies').append('<li class="list-group-item px-3 py-2">' + selectedMovie.name + '</li>');
+                    }      
+                    // Clear the value of movie input
+                    $('#movie').typeahead('val', '');
+                });
+            }
+            // Custom error handling
+            function isFormValid(viewModel) {
+
+                var hasErrors = false;
+                var customerInput = $('#customer');
+                var movieInput = $('#movie');
+
+                if (!customerInput.val()) {
+                    customerInput.addClass('error');
+                    customerInput.after('<label id="customer-error" class="error" for="customer"> Customer is required </label>');
+                    hasErrors = true;
+                }
+                else if (!viewModel.customerId || viewModel.customerId === 0) {
+                    customerInput.addClass('error');
+                    customerInput.after('<label id="customer-error" class="error" for="customer"> Please select a valid customer </label>');
+                    hasErrors = true;
+                }
+
+                if (viewModel.movieIds.length === 0) {
+                    movieInput.addClass('error');
+                    movieInput.after('<label id="movie-error" class="error" for="movie"> Please select at least 1 movie </label>');
+                    hasErrors = true;
+                }
+
+                if (hasErrors)
+                    return false;
+                return true;
+            }
+            function clearErrors() {
+                clearCustomerErrors();
+                clearMovieErrors();
+            }
+            function clearCustomerErrors() {
+                $('#customer').removeClass('error');
+                $('#customer-error').remove();
+            }
+            function clearMovieErrors() {
+                $('#movie').removeClass('error');
+                $('#movie-error').remove();
+            }
+            // Clear data on successfull submit
+            function clearData() {
+                vm = { movieIds: [] };
+                $('#customer').typeahead('val', '');
+                $('#movie').typeahead('val', '');
+                $('#movies').empty();
+                $('#movies').append('<li id="empty-list" class="list-group-item text-center text-secondary font-italic px-3 py-2">Cart is currently empty</li>');
+            }
+
+        });
+    </script>
+}
